@@ -14,6 +14,12 @@ Lean revision notes for SDE-2 internal team-switch interviews, focused on Java +
   - Pagination
   - Common request/response headers
   - ETag / conditional requests
+  - Cookies & browser authentication
+  - JWT
+  - OAuth 2.0 + Authorization Code + PKCE
+  - OIDC basics
+  - SOP & CORS
+  - CSRF
 
 ### 2. DBMS & SQL
 - _Not started_
