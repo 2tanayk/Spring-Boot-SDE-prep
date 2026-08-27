@@ -415,6 +415,519 @@ Set-Cookie: sessionId=abc123; HttpOnly; Secure
 
 ---
 
+## 8. Cookies & Browser Authentication
+
+A **cookie** is small data that a server asks a browser/client to store. The browser can automatically attach applicable cookies to later requests for that domain/path.
+
+Example after login:
+
+```http
+Set-Cookie: sessionId=abc123; HttpOnly; Secure
+```
+
+The browser stores:
+
+```text
+bank.com -> sessionId=abc123
+```
+
+Later:
+
+```http
+GET /account
+Cookie: sessionId=abc123
+```
+
+The server can map the session ID to the authenticated user.
+
+### Important cookie attributes
+
+**`HttpOnly`**
+
+Prevents JavaScript from reading the cookie through APIs such as `document.cookie`. It does **not** prevent the browser from sending the cookie.
+
+**`Secure`**
+
+Cookie is sent only over HTTPS.
+
+**`SameSite`**
+
+Controls when the browser sends the cookie in cross-site contexts.
+
+- `Strict` — strongest cross-site restriction.
+- `Lax` — more permissive; common practical default.
+- `None` — permits cross-site use; requires `Secure`.
+
+### `credentials: "include"`
+
+For a browser `fetch`, this tells the browser to include applicable credentials, especially cookies, on a cross-origin request:
+
+```javascript
+fetch("https://api.example.com/account", {
+    credentials: "include"
+});
+```
+
+It **does not bypass cookie security rules**. `SameSite`, domain/path, Secure, and other cookie rules still apply.
+
+For a credentialed cross-origin request, the server also needs an appropriate CORS response, including:
+
+```http
+Access-Control-Allow-Origin: https://app.example.com
+Access-Control-Allow-Credentials: true
+```
+
+`Access-Control-Allow-Origin: *` cannot be used as the wildcard origin for a credentialed CORS request.
+
+---
+
+## 9. SOP & CORS
+
+### Same-Origin Policy (SOP)
+
+A browser security policy that generally prevents JavaScript from one **origin** from freely reading data from another origin.
+
+An **origin** is:
+
+```text
+scheme + host + port
+```
+
+For example:
+
+```text
+https://app.example.com
+https://api.example.com
+```
+
+are different origins because their hosts differ.
+
+SOP does **not** mean the browser can never send cross-origin requests. The important restriction is that JavaScript is not automatically allowed to read cross-origin responses.
+
+### CORS
+
+**Cross-Origin Resource Sharing** is a browser-enforced mechanism that lets a server explicitly allow selected origins to access its cross-origin responses.
+
+Request:
+
+```http
+Origin: https://app.example.com
+```
+
+Response:
+
+```http
+Access-Control-Allow-Origin: https://app.example.com
+```
+
+CORS is primarily a browser concern. Backend-to-backend calls and tools such as Postman do not enforce browser SOP/CORS in the same way.
+
+### CORS vs CSRF
+
+They solve different problems:
+
+```text
+CORS
+-> Controls whether cross-origin JavaScript can read responses.
+
+CSRF
+-> Protects against an attacker tricking an authenticated browser
+   into performing an unwanted state-changing request.
+```
+
+CORS is **not** a replacement for CSRF protection. A cross-origin request can potentially reach the server even when the attacker's JavaScript is prevented from reading the response.
+
+---
+
+## 10. CSRF
+
+**CSRF (Cross-Site Request Forgery)** exploits the browser's automatic inclusion of authentication credentials, especially cookies.
+
+### Example
+
+User is logged into `bank.com`:
+
+```text
+Browser cookie:
+sessionId=ABC123
+
+Bank:
+ABC123 -> Tanay
+```
+
+User visits `evil.com`. The malicious site causes the browser to send:
+
+```http
+POST https://bank.com/transfer
+Cookie: sessionId=ABC123
+
+amount=10000
+toAccount=ATTACKER
+```
+
+The attacker does **not** know `ABC123`. The browser attached it automatically because the request targets `bank.com`.
+
+The bank sees an authenticated request and may perform the action.
+
+### Why cookies make this possible
+
+The browser automatically sends applicable cookies. A Bearer JWT in:
+
+```http
+Authorization: Bearer <JWT>
+```
+
+is normally not automatically attached to arbitrary cross-site requests; application code must supply it.
+
+However, if the JWT is stored in a cookie, the CSRF concern returns because the browser can automatically send that cookie.
+
+### CSRF defenses
+
+- **CSRF token:** legitimate client sends an additional unpredictable token that the attacker cannot obtain.
+- **SameSite cookies:** restrict cookie sending in cross-site contexts.
+- Other appropriate browser/server security controls.
+
+For a stateless API using a Bearer token in the `Authorization` header, CSRF protection is often disabled because the authentication credential is not automatically attached by the browser in the same way as a session cookie.
+
+### CSRF vs XSS
+
+```text
+CSRF -> attacker tricks the browser into making an authenticated request.
+XSS  -> attacker gets malicious JavaScript to execute in the trusted site's context.
+```
+
+`HttpOnly` helps prevent JavaScript from reading a cookie, while CSRF defenses address forged authenticated requests.
+
+---
+
+## 11. JWT
+
+A **JWT (JSON Web Token)** is a signed token containing claims about an authenticated identity or other token context.
+
+Typical structure:
+
+```text
+HEADER.PAYLOAD.SIGNATURE
+```
+
+### Header
+
+Describes the token type/signing algorithm:
+
+```json
+{
+  "alg": "RS256",
+  "typ": "JWT"
+}
+```
+
+### Payload
+
+Contains claims:
+
+```json
+{
+  "sub": "123",
+  "role": "ADMIN",
+  "iat": 1750000000,
+  "exp": 1750003600,
+  "jti": "abc-123"
+}
+```
+
+Important claims:
+
+- `sub` — subject/identity represented by the token.
+- `iat` — issued-at time.
+- `exp` — expiration time.
+- `jti` — unique JWT identifier; useful for revocation/blacklisting.
+- `iss` — issuer.
+- `aud` — intended audience.
+
+### JWT is not encrypted by default
+
+The header and payload are encoded, not encrypted. Anyone who has the token can decode them.
+
+Therefore:
+
+> Do not put secrets such as passwords into a normal JWT payload.
+
+### Signature
+
+The signature is calculated over the header and payload using a signing key.
+
+Conceptually:
+
+```text
+signature = Sign(header + "." + payload, signing key)
+```
+
+The receiver validates the signature. If someone changes a claim such as:
+
+```text
+role=USER
+```
+
+to:
+
+```text
+role=ADMIN
+```
+
+the signature no longer matches.
+
+Therefore the signature provides **integrity/authenticity**, not confidentiality.
+
+### Symmetric vs asymmetric signing
+
+**HS256 / symmetric:** the same shared secret is used to sign and verify.
+
+**RS256 / asymmetric:** private key signs; public key verifies.
+
+With asymmetric signing, resource servers can verify tokens without possessing the private signing key.
+
+```text
+Authorization Server
+  private key -> sign
+
+Resource Server
+  public key  -> verify
+```
+
+### JWT validation
+
+Validating a JWT is more than checking the signature. Depending on the application, validate:
+
+```text
+signature
++ expiration
++ issuer
++ audience
++ required claims
+```
+
+### JWT in Spring Security
+
+Conceptually:
+
+```text
+HTTP request
+    ↓
+Security Filter Chain
+    ↓
+Extract Bearer token
+    ↓
+Validate JWT
+    ↓
+Create Authentication
+    ↓
+SecurityContext
+    ↓
+Authorization checks
+    ↓
+Controller
+```
+
+JWT establishes/verifies identity and claims; authorization is a separate step.
+
+For example:
+
+```java
+@PreAuthorize("hasAuthority('ACCOUNT_READ_ANY')")
+```
+
+checks whether the authenticated principal has the required authority.
+
+### Statelessness and revocation
+
+JWT enables stateless authentication because the API can validate the token without a server-side session lookup for basic authentication.
+
+However, revocation changes this picture.
+
+Example:
+
+```text
+JWT jti = abc123
+
+Revoked JTIs:
+abc123
+```
+
+The token may still have a valid signature and unexpired `exp`, but the server can reject it because its `jti` is revoked.
+
+Therefore:
+
+> JWT enables stateless authentication, but mechanisms such as JTI blacklists introduce server-side state around token validity.
+
+Short-lived access tokens reduce the impact of token theft; refresh tokens can be used to obtain new access tokens.
+
+### Session vs JWT
+
+**Session:**
+
+```text
+Client -> session ID -> Server -> session state
+```
+
+Pros: easy revocation; server controls authentication state.
+
+Cons: distributed applications need shared session state or another scaling strategy.
+
+**JWT:**
+
+```text
+Client -> signed token -> API
+```
+
+Pros: easy horizontal scaling; no session lookup required for basic validation.
+
+Cons: revocation is harder; stolen tokens are serious; tokens can become stale and add request size.
+
+---
+
+## 12. OAuth 2.0
+
+**OAuth 2.0 is an authorization framework for delegated access.** It allows an application to obtain limited access to protected resources without requiring the user to give the application their password.
+
+### Four actors
+
+1. **Resource Owner** — user who owns the data.
+2. **Client** — application requesting access.
+3. **Authorization Server** — authenticates/obtains consent and issues tokens.
+4. **Resource Server** — API that protects and serves the resource.
+
+```text
+Resource Owner
+      ↓
+   Client
+      ↓
+Authorization Server
+      ↓
+  Access Token
+      ↓
+Resource Server
+```
+
+The Authorization Server issues the token; the Resource Server validates/uses it to authorize access.
+
+### Authorization Code Flow
+
+Typical flow:
+
+```text
+1. Client redirects user to Authorization Server
+2. Authorization Server authenticates user + obtains consent
+3. Authorization Server redirects back with authorization code
+4. Backend exchanges code at token endpoint
+5. Authorization Server returns access token
+6. Client uses access token to call Resource Server
+```
+
+The authorization code is **not** the access token. It is a short-lived credential exchanged for tokens.
+
+### PKCE
+
+**PKCE (Proof Key for Code Exchange)** binds the authorization-code exchange to the client that initiated it.
+
+Client generates a secret:
+
+```text
+code_verifier = random value
+```
+
+and sends a derived value:
+
+```text
+code_challenge = SHA-256(code_verifier)
+```
+
+with the authorization request.
+
+After receiving the authorization code, the client sends:
+
+```text
+authorization_code + code_verifier
+```
+
+to the token endpoint. The Authorization Server verifies that the verifier matches the original challenge.
+
+If an attacker steals only the authorization code, they do not have the verifier and cannot complete the exchange.
+
+```text
+code_verifier
+      ↓
+  derive/hash
+      ↓
+code_challenge ──→ Authorization Server
+
+      ...user login...
+
+authorization_code ←─ Authorization Server
+
+code + code_verifier ─→ Token Endpoint
+                         ↓
+                    verify challenge
+                         ↓
+                    Access Token
+```
+
+### Scopes
+
+Scopes define the permissions being requested/granted:
+
+```text
+scope=profile:read email:read
+```
+
+The Resource Server can enforce the required scope for an operation.
+
+### OAuth vs JWT
+
+They are different concepts:
+
+```text
+OAuth 2.0 -> authorization framework
+JWT       -> token format
+```
+
+An OAuth access token **can be a JWT**, but it can also be an opaque token.
+
+### OAuth vs OIDC
+
+OAuth 2.0 is primarily about delegated authorization.
+
+**OpenID Connect (OIDC)** adds an identity/authentication layer on top of OAuth 2.0.
+
+```text
+OAuth 2.0 -> delegated authorization
+OIDC      -> user identity/authentication on OAuth 2.0
+```
+
+OIDC introduces the **ID Token**, which is distinct from an access token.
+
+- **Access Token:** intended to authorize access to a Resource Server.
+- **ID Token:** provides identity information to the client/application.
+
+### Common architecture: external OAuth/OIDC + internal JWT
+
+An application can use an external identity provider:
+
+```text
+External OAuth/OIDC
+       ↓
+External identity established
+       ↓
+Your backend
+       ↓
+Issue your own JWT
+       ↓
+Your APIs
+```
+
+This separates external identity from the application's own API authentication/authorization model.
+
+---
+
 ## Interview Quick Recall
 
 ### REST
@@ -435,8 +948,32 @@ Set-Cookie: sessionId=abc123; HttpOnly; Secure
 
 ### ETag
 
-> Server-provided resource version identifier used with `If-None-Match` for conditional requests; unchanged resource can produce `304 Not Modified`.
+> Server-provided resource version/state identifier used with `If-None-Match` for conditional requests; unchanged resource can produce `304 Not Modified`.
 
-### Pagination
+### Cookies
 
-> Offset is simpler but can degrade with large offsets; cursor/keyset is more scalable for large, changing datasets but is more complex and doesn't support arbitrary page jumps naturally.
+> Browser-managed data that can be automatically attached to matching requests. `HttpOnly` blocks JavaScript access, `Secure` restricts sending to HTTPS, and `SameSite` controls cross-site sending.
+
+### SOP / CORS
+
+> SOP restricts cross-origin JavaScript access. CORS is the mechanism for selectively allowing origins to read cross-origin responses.
+
+### CSRF
+
+> Attacker tricks an authenticated browser into making an unwanted request, commonly exploiting automatically attached cookies. CSRF token and SameSite are common defenses.
+
+### `credentials: "include"`
+
+> Tells the browser to include applicable credentials on a cross-origin fetch; it does not bypass `SameSite` or other cookie rules.
+
+### JWT
+
+> Signed token containing claims. Payload is encoded, not encrypted. Signature provides integrity/authenticity. JWT can enable stateless authentication, while revocation mechanisms introduce state.
+
+### OAuth 2.0
+
+> Authorization framework for delegated access. Authorization Code + PKCE is the key flow to understand for modern applications.
+
+### OAuth vs OIDC vs JWT
+
+> OAuth 2.0 = authorization framework; OIDC = identity layer on OAuth 2.0; JWT = token format.
