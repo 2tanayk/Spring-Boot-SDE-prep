@@ -13,6 +13,8 @@ Lean revision notes for SDE-2 internal team-switch interviews, focused on Java +
 
 - [04 — Cookies, CSRF, SOP & CORS](notes/04-cookies-csrf-sop-cors.md)
 
+- [05 — Caching](notes/05-caching.md)
+
 ### 2. DBMS & SQL
 - _Not started_
 
