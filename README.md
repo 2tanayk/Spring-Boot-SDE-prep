@@ -17,6 +17,8 @@ Lean revision notes for SDE-2 internal team-switch interviews, focused on Java +
 
 - [06 — Distributed Systems Basics](notes/06-distributed-systems-basics.md)
 
+- [07 — Messaging](notes/07-messaging.md)
+
 ### 2. DBMS & SQL
 - _Not started_
 
