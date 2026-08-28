@@ -21,6 +21,8 @@ Lean revision notes for SDE-2 internal team-switch interviews, focused on Java +
 
 - [08 — Reliability & Observability](notes/08-reliability-observability.md)
 
+- [09 — Monolith vs Microservices](notes/09-monolith-vs-microservices.md)
+
 ### 2. DBMS & SQL
 - _Not started_
 
