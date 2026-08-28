@@ -19,6 +19,8 @@ Lean revision notes for SDE-2 internal team-switch interviews, focused on Java +
 
 - [07 — Messaging](notes/07-messaging.md)
 
+- [08 — Reliability & Observability](notes/08-reliability-observability.md)
+
 ### 2. DBMS & SQL
 - _Not started_
 
