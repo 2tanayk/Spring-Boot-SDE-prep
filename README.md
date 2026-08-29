@@ -25,7 +25,8 @@ Lean revision notes for SDE-2 internal team-switch interviews, focused on Java +
 
 ### 2. DBMS & SQL
 - [10 — DBMS Fundamentals](notes/10-dbms-fundamentals.md)
-- _Next: Data Modeling & ER Diagrams_
+- [11 — Data Modeling & ER Diagrams](notes/11-data-modeling-er-diagrams.md)
+- _Next: Transactions & ACID_
 
 ### 3. Spring Boot & Spring Ecosystem
 - _Not started_
