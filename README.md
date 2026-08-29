@@ -20,6 +20,7 @@ Lean revision notes for SDE-2 internal team-switch interviews, focused on Java +
 - [11 — Data Modeling & ER Diagrams](notes/11-data-modeling-er-diagrams.md)
 - [12 — SQL](notes/12-sql-subqueries.md)
 - [13 — Indexes](notes/13-indexes.md)
+- [14 — Database Constraints](notes/14-database-constraints.md)
 - _Next: Transactions & ACID_
 
 ### 3. Spring Boot & Spring Ecosystem
