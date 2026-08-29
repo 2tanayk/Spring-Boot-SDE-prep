@@ -6,28 +6,20 @@ Lean revision notes for SDE-2 internal team-switch interviews, focused on Java +
 
 ### 1. REST & Backend Concepts
 - [01 — REST & HTTP](notes/01-rest-and-http.md)
-
 - [02 — JWT](notes/02-jwt.md)
-
 - [03 — OAuth 2.0, OIDC & PKCE](notes/03-oauth2-oidc.md)
-
 - [04 — Cookies, CSRF, SOP & CORS](notes/04-cookies-csrf-sop-cors.md)
-
 - [05 — Caching](notes/05-caching.md)
-
 - [06 — Distributed Systems Basics](notes/06-distributed-systems-basics.md)
-
 - [07 — Messaging](notes/07-messaging.md)
-
 - [08 — Reliability & Observability](notes/08-reliability-observability.md)
-
 - [09 — Monolith vs Microservices](notes/09-monolith-vs-microservices.md)
 
 ### 2. DBMS & SQL
 - [10 — DBMS Fundamentals](notes/10-dbms-fundamentals.md)
 - [11 — Data Modeling & ER Diagrams](notes/11-data-modeling-er-diagrams.md)
-- [12 — SQL Subqueries](notes/12-sql-subqueries.md)
-- _Next: Transactions & ACID_
+- [12 — SQL](notes/12-sql-subqueries.md)
+- _Next: Indexes_
 
 ### 3. Spring Boot & Spring Ecosystem
 - _Not started_
