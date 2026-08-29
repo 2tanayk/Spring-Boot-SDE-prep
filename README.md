@@ -24,7 +24,8 @@ Lean revision notes for SDE-2 internal team-switch interviews, focused on Java +
 - [09 — Monolith vs Microservices](notes/09-monolith-vs-microservices.md)
 
 ### 2. DBMS & SQL
-- _Not started_
+- [10 — DBMS Fundamentals](notes/10-dbms-fundamentals.md)
+- _Next: Data Modeling & ER Diagrams_
 
 ### 3. Spring Boot & Spring Ecosystem
 - _Not started_
