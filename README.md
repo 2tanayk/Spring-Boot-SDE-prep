@@ -22,7 +22,8 @@ Lean revision notes for SDE-2 internal team-switch interviews, focused on Java +
 - [13 — Indexes](notes/13-indexes.md)
 - [14 — Database Constraints](notes/14-database-constraints.md)
 - [15 — SQL NULLs & PostgreSQL](notes/15-sql-nulls-postgresql.md)
-- _Next: Transactions & ACID_
+- [16 — Transactions, ACID & Concurrency](notes/16-transactions-acid.md)
+- _Next: Isolation Levels & MVCC deep dive_
 
 ### 3. Spring Boot & Spring Ecosystem
 - _Not started_
