@@ -30,7 +30,7 @@ Lean revision notes for SDE-2 internal team-switch interviews, focused on Java +
 - [21 — SQL vs NoSQL](notes/21-sql-vs-nosql.md)
 
 ### 3. Spring Boot & Spring Ecosystem
-- _Not started_
+- [22 — Bean Lifecycle & Scopes](notes/22-bean-lifecycle-and-scopes.md)
 
 ## Priority
 
