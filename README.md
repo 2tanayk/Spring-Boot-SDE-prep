@@ -31,6 +31,7 @@ Lean revision notes for SDE-2 internal team-switch interviews, focused on Java +
 
 ### 3. Spring Boot & Spring Ecosystem
 - [22 — IoC, Dependency Injection, Bean Lifecycle & Scopes](notes/22-bean-lifecycle-and-scopes.md)
+- [23 — Spring Boot Auto-Configuration, Autowiring & @SpringBootApplication](notes/23-spring-boot-auto-configuration-and-autowiring.md)
 
 ## Priority
 
