@@ -25,6 +25,7 @@ Lean revision notes for SDE-2 internal team-switch interviews, focused on Java +
 - [16 — Transactions, ACID & Concurrency](notes/16-transactions-acid.md)
 - [17 — Locking: Optimistic & Pessimistic](notes/17-locking.md)
 - [18 — Connection Pooling](notes/18-connection-pooling.md)
+- [19 — Normalization & Denormalization](notes/19-normalization-denormalization.md)
 - _Next: Isolation Levels & MVCC deep dive_
 
 ### 3. Spring Boot & Spring Ecosystem
