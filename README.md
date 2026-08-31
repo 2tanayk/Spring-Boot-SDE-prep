@@ -27,7 +27,7 @@ Lean revision notes for SDE-2 internal team-switch interviews, focused on Java +
 - [18 — Connection Pooling](notes/18-connection-pooling.md)
 - [19 — Normalization & Denormalization](notes/19-normalization-denormalization.md)
 - [20 — Database Migrations](notes/20-database-migrations.md)
-- _Next: Spring Boot & Spring Ecosystem_
+- [21 — SQL vs NoSQL](notes/21-sql-vs-nosql.md)
 
 ### 3. Spring Boot & Spring Ecosystem
 - _Not started_
