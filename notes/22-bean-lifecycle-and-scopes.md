@@ -9,7 +9,10 @@ Without dependency injection, a class may construct its own dependencies:
 ```java
 class OrderService {
     private final PaymentService paymentService;
-    public OrderService() { this.paymentService = new PaymentService(); }
+
+    public OrderService() {
+        this.paymentService = new PaymentService();
+    }
 }
 ```
 
@@ -22,7 +25,10 @@ Instead, make the dependency explicit and let an external component provide it:
 ```java
 class OrderService {
     private final PaymentService paymentService;
-    public OrderService(PaymentService paymentService) { this.paymentService = paymentService; }
+
+    public OrderService(PaymentService paymentService) {
+        this.paymentService = paymentService;
+    }
 }
 ```
 
@@ -65,7 +71,8 @@ A **bean is an object whose lifecycle is managed by the Spring IoC container.**
 
 ```java
 @Service
-public class OrderService { }
+public class OrderService {
+}
 ```
 
 Beans can also be explicitly declared:
@@ -73,6 +80,7 @@ Beans can also be explicitly declared:
 ```java
 @Configuration
 public class AppConfig {
+
     @Bean
     public PaymentClient paymentClient() {
         return new PaymentClient();
@@ -85,7 +93,9 @@ public class AppConfig {
 ```java
 @Service
 public class OrderService {
+
     private final PaymentService paymentService;
+
     public OrderService(PaymentService paymentService) {
         this.paymentService = paymentService;
     }
@@ -107,22 +117,7 @@ Constructor injection:
 OrderService service = new OrderService(mockPaymentService);
 ```
 
-### Interface + DI
-
-DI is especially useful when depending on abstractions:
-
-```java
-public interface PaymentService {
-    void pay(Order order);
-}
-```
-
-```java
-@Service
-public class StripePaymentService implements PaymentService { }
-```
-
-`OrderService` can depend on `PaymentService` rather than a concrete implementation. When multiple implementations exist, Spring provides mechanisms such as `@Primary` and `@Qualifier` to select one.
+DI is especially useful when depending on abstractions. When multiple implementations exist, Spring provides mechanisms such as `@Primary` and `@Qualifier` to select one.
 
 ## 5. Bean lifecycle
 
@@ -187,7 +182,8 @@ Important interview trap:
 ```java
 @Scope("prototype")
 @Component
-public class ReportGenerator { }
+public class ReportGenerator {
+}
 ```
 
 Spring creates a new instance when the bean is requested from the container. Separate lookups return different instances.
@@ -214,6 +210,7 @@ Bad:
 @Service
 public class OrderService {
     private Order currentOrder;  // shared mutable state
+
     public void process(Order order) {
         this.currentOrder = order;
     }
@@ -240,11 +237,13 @@ A common trap is assuming a prototype dependency injected into a singleton is re
 ```java
 @Component
 @Scope("prototype")
-class Worker { }
+class Worker {
+}
 
 @Service
 class JobService {
     private final Worker worker;
+
     JobService(Worker worker) {
         this.worker = worker;
     }
@@ -254,6 +253,269 @@ class JobService {
 `JobService` is a singleton. When Spring creates it, it resolves the `Worker` dependency and injects an instance once. The prototype scope does not magically create a new `Worker` on every method call.
 
 If a fresh prototype instance is required each time, use a provider/factory mechanism such as `ObjectProvider` rather than relying on direct injection alone.
+
+## 9. Spring Boot Auto-Configuration
+
+Spring Boot's major contribution is making configuration largely automatic based on the application's dependencies and configuration.
+
+For example, adding JPA and PostgreSQL dependencies can allow Boot to configure infrastructure such as a `DataSource`, JPA/Hibernate infrastructure, and transaction-related infrastructure without manually declaring every bean.
+
+The basic model is:
+
+```text
+Dependencies on classpath
+        +
+Application configuration
+        +
+Existing beans
+        ↓
+Spring Boot Auto-Configuration
+        ↓
+Configure appropriate infrastructure
+```
+
+### Conditional auto-configuration
+
+Auto-configuration is primarily **conditional**. Boot does not blindly create everything.
+
+Conceptually:
+
+```text
+Relevant classes available?
+        ↓
+Required configuration present?
+        ↓
+User already defined the bean?
+        ↓
+Yes → configure
+No  → don't configure / back off
+```
+
+A key principle is:
+
+> **Convention by default, customization when needed.**
+
+If you provide your own relevant configuration, Boot generally backs off rather than creating a competing default.
+
+### Classpath-driven configuration
+
+The classpath is a major input. Adding a starter/dependency makes relevant classes available, allowing Boot's conditions to activate appropriate auto-configuration.
+
+```text
+Add dependency
+      ↓
+Classes available on classpath
+      ↓
+Boot's conditions detect them
+      ↓
+Relevant auto-configuration activates
+```
+
+## 10. `@SpringBootApplication`
+
+Typical application entry point:
+
+```java
+@SpringBootApplication
+public class Application {
+
+    public static void main(String[] args) {
+        SpringApplication.run(Application.class, args);
+    }
+}
+```
+
+`@SpringBootApplication` is a convenience annotation combining:
+
+```java
+@SpringBootConfiguration
+@EnableAutoConfiguration
+@ComponentScan
+```
+
+### `@SpringBootConfiguration`
+
+Identifies the class as a Spring Boot configuration class. It is effectively a specialized form of `@Configuration` for a Boot application.
+
+### `@EnableAutoConfiguration`
+
+Activates Spring Boot's auto-configuration mechanism.
+
+### `@ComponentScan`
+
+Tells Spring where to search for application components such as:
+
+```java
+@Component
+@Service
+@Repository
+@Controller
+@RestController
+```
+
+The default scan starts from the package of the application class and covers its subpackages. Therefore the main application class should normally be placed near the root package.
+
+## 11. Component scanning vs auto-configuration
+
+These are related but different.
+
+**Component scanning:**
+
+> Finds and registers your application's components.
+
+Examples:
+
+```text
+@Service
+@Repository
+@RestController
+@Component
+```
+
+**Auto-configuration:**
+
+> Configures framework/infrastructure beans based on the environment.
+
+Examples include infrastructure for:
+
+```text
+DataSource
+JPA/Hibernate
+MVC
+Jackson
+```
+
+A useful startup mental model is:
+
+```text
+main()
+  ↓
+SpringApplication.run()
+  ↓
+Create ApplicationContext
+  ↓
+Component scanning
+  ↓
+Discover configuration/classes
+  ↓
+Apply auto-configuration
+  ↓
+Register bean definitions
+  ↓
+Create/wire beans
+  ↓
+Application ready
+```
+
+## 12. Autowiring
+
+Autowiring is dependency resolution between beans.
+
+Given:
+
+```java
+@Service
+public class OrderService {
+
+    private final PaymentService paymentService;
+
+    public OrderService(PaymentService paymentService) {
+        this.paymentService = paymentService;
+    }
+}
+```
+
+Spring looks in the container for a suitable `PaymentService` bean. If exactly one candidate exists, it can inject it.
+
+### Multiple candidates
+
+If multiple implementations exist:
+
+```text
+PaymentService
+     ↑
+ ┌───┴──────────────┐
+ │                  │
+Stripe          Razorpay
+```
+
+Spring cannot arbitrarily choose between them and can fail with a `NoUniqueBeanDefinitionException`.
+
+### `@Primary`
+
+```java
+@Service
+@Primary
+public class StripePaymentService implements PaymentService {
+}
+```
+
+`@Primary` marks an implementation as the default candidate when multiple candidates exist.
+
+Think:
+
+> **`@Primary` = "This is the default."**
+
+### `@Qualifier`
+
+When a specific implementation is required:
+
+```java
+@Service("stripe")
+public class StripePaymentService implements PaymentService {
+}
+
+@Service("razorpay")
+public class RazorpayPaymentService implements PaymentService {
+}
+```
+
+```java
+public OrderService(
+        @Qualifier("razorpay") PaymentService paymentService) {
+    this.paymentService = paymentService;
+}
+```
+
+Think:
+
+> **`@Qualifier` = "I specifically want this one."**
+
+If both are applicable, the qualifier provides explicit selection.
+
+### Do we need `@Autowired`?
+
+With a single constructor, `@Autowired` is unnecessary:
+
+```java
+public OrderService(PaymentService paymentService) {
+    this.paymentService = paymentService;
+}
+```
+
+Spring recognizes the constructor for injection.
+
+Constructor injection is preferred over field injection because dependencies are explicit, required dependencies can be `final`, and unit testing is straightforward.
+
+## 13. Auto-configuration vs Autowiring
+
+Do not conflate them.
+
+**Auto-configuration:**
+
+> What infrastructure/configuration should Spring Boot create based on the environment?
+
+**Autowiring:**
+
+> Which existing bean should be injected into another bean?
+
+```text
+Auto-configuration
+→ configuration/creation of infrastructure
+
+Autowiring
+→ dependency resolution/injection
+```
 
 ## Interview Quick Recall
 
@@ -277,4 +539,16 @@ If a fresh prototype instance is required each time, use a provider/factory mech
 
 > A prototype dependency injected directly into a singleton is not recreated for every method call; it is resolved when the singleton is created.
 
-> Spring's DI mechanism also enables framework features such as proxies, which becomes important for AOP and `@Transactional`.
+> **Auto-configuration** configures Spring Boot infrastructure based on classpath dependencies, configuration, and conditions, and generally backs off when you provide your own relevant configuration.
+
+> **`@SpringBootApplication`** combines `@SpringBootConfiguration`, `@EnableAutoConfiguration`, and `@ComponentScan`.
+
+> **Component scanning** finds your application's components; **auto-configuration** configures framework/infrastructure beans.
+
+> **Autowiring** resolves dependencies between beans.
+
+> Multiple matching beans require disambiguation such as `@Primary` or `@Qualifier`.
+
+> With a single constructor, `@Autowired` is unnecessary.
+
+> **Auto-configuration ≠ autowiring**: auto-configuration configures infrastructure; autowiring injects dependencies between existing beans.
