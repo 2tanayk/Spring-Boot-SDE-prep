@@ -36,6 +36,7 @@ Lean revision notes for SDE-2 internal team-switch interviews, focused on Java +
 - [25 — Spring MVC — DispatcherServlet Request Lifecycle](notes/24-spring-mvc-dispatcherservlet-request-lifecycle.md)
 - [26 — Filter vs Interceptor](notes/25-filter-vs-interceptor.md)
 - [27 — @ControllerAdvice](notes/26-controller-advice.md)
+- [28 — JPA/Hibernate — Persistence Context, First-Level Cache, Entity Lifecycle, Dirty Checking, Flush & Lazy Loading](notes/27-jpa-hibernate-persistence-context.md)
 
 ## Priority
 
