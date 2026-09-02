@@ -40,6 +40,7 @@ Lean revision notes for SDE-2 internal team-switch interviews, focused on Java +
 - [29 — JPA/Hibernate — Entity Relationships, Fetching & Cascades](notes/28-jpa-hibernate-entity-relationships-fetching-and-cascades.md)
 - [30 — @Transactional — Proxy, Propagation, Isolation & Self-Invocation](notes/30-spring-transactional-proxy-propagation-isolation.md)
 - [31 — JPA/Hibernate — EAGER vs JOIN FETCH](notes/31-jpa-eager-vs-join-fetch.md)
+- [32 — JPA/Spring Data — Bulk Updates & @Modifying](notes/32-jpa-bulk-updates-and-modifying.md)
 
 ## Priority
 
