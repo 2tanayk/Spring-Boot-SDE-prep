@@ -38,6 +38,7 @@ Lean revision notes for SDE-2 internal team-switch interviews, focused on Java +
 - [27 — @ControllerAdvice](notes/26-controller-advice.md)
 - [28 — JPA/Hibernate — Persistence Context, First-Level Cache, Entity Lifecycle, Dirty Checking, Flush & Lazy Loading](notes/27-jpa-hibernate-persistence-context.md)
 - [29 — JPA/Hibernate — Entity Relationships, Fetching & Cascades](notes/28-jpa-hibernate-entity-relationships-fetching-and-cascades.md)
+- [30 — @Transactional — Proxy, Propagation, Isolation & Self-Invocation](notes/30-spring-transactional-proxy-propagation-isolation.md)
 
 ## Priority
 
