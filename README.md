@@ -41,6 +41,7 @@ Lean revision notes for SDE-2 internal team-switch interviews, focused on Java +
 - [30 — @Transactional — Proxy, Propagation, Isolation & Self-Invocation](notes/30-spring-transactional-proxy-propagation-isolation.md)
 - [31 — JPA/Hibernate — EAGER vs JOIN FETCH](notes/31-jpa-eager-vs-join-fetch.md)
 - [32 — JPA/Spring Data — Bulk Updates & @Modifying](notes/32-jpa-bulk-updates-and-modifying.md)
+- [33 — JPA/Hibernate — Optimistic & Pessimistic Locking](notes/33-optimistic-pessimistic-locking.md)
 
 ## Priority
 
