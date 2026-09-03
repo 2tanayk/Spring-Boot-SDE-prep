@@ -43,6 +43,7 @@ Lean revision notes for SDE-2 internal team-switch interviews, focused on Java +
 - [32 — JPA/Spring Data — Bulk Updates & @Modifying](notes/32-jpa-bulk-updates-and-modifying.md)
 - [33 — JPA/Hibernate — Optimistic & Pessimistic Locking](notes/33-optimistic-pessimistic-locking.md)
 - [34 — Spring Security — Filter Chain, SecurityContext & Method Security](notes/34-spring-security-filter-chain-security-context-method-security.md)
+- [35 — Spring Profiles & Configuration](notes/35-spring-profiles-and-configuration.md)
 
 ## Priority
 
